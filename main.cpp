@@ -17,19 +17,20 @@ const long pMax = 1000;
 long findMinVert()
 {
 	long Min = N, iMin;
-	for (int i = 0; i < N; i++)
+	//Находим первую неудаленную вершину. Ставим его начальной точкой приближения
+	for (int i = 1; i <= N; i++)
 		if (removed[i] == 0)
 		{
 			iMin = i;
 			break;
 		}
 
-	for (int i = 0; i < N; i++)
+	for (int i = 1; i <= N; i++)
 	{
 		if (removed[i] == 0)
 		{
 			long count = 0;
-			for (int j = 0; j < N; j++)
+			for (int j = 1; j <= N; j++)
 			{
 				if (removed[j] == 0 && A[i][j] < pMax)
 					count++;
@@ -40,23 +41,24 @@ long findMinVert()
 			}
 		}
 	}
-	return 0;
+	return iMin;
 }
 
+//Здесь мы инициализируем матрицы
 void init()
 {
 	freopen("input.txt", "r", stdin);
 	freopen("output.txt", "w", stdout);
 	cin >> N;
-	A.resize(N);
-	S.resize(N);
-	removed.resize(N);
+	A.resize(N + 1);
+	S.resize(N + 1);
+	removed.resize(N + 1, 0);
 
-	for (int i = 0; i < N; i++)
+	for (int i = 1; i <= N; i++)
 	{
-		A[i].resize(N);
-		S[i].resize(N);
-		for (int j = 0; j < N; j++){
+		A[i].resize(N + 1);
+		S[i].resize(N + 1, 0);
+		for (int j = 1; j <= N; j++){
 			cin >> A[i][j];
 			if (A[i][j] < 0)
 				A[i][j] = pMax;
@@ -64,9 +66,22 @@ void init()
 	}
 }
 
+// Собственно говоря, само решение
+void solve()
+{
+	//p - порядковый номер удаления вершин
+	for (int p = 1; p < N; p++)
+	{
+		// Вершина, которую будем удалять
+		long Min = findMinVert();
+		removed[Min] = p;
+
+	}
+}
+
 int main()
 {
-	
 	init();
+	solve();
 	return 0;
 }
