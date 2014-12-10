@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <time.h>
 
 using namespace std;
 
@@ -18,8 +19,9 @@ vector<long> base;
 
 long N;
 //Размерность
-const long pMax = 1000;
 
+const long gMax = 100;
+const long pMax = 100000;
 //Ищем вершину с минимальным количеством смежных вершин с остальными вершинами
 //которые ещё не были удалены
 long findMinVert()
@@ -52,12 +54,37 @@ long findMinVert()
 	return iMin;
 }
 
+//Генерация графа, точнее матрицы
+//Граф неориентированный
+void generation()
+{
+	srand(time(NULL));
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = i + 1; j <= N; j++)
+		{
+			if (rand() % 100 > 40) {
+				A[i][j] = pMax;
+				A[j][i] = pMax;
+			}
+			else {
+				A[i][j] = rand() % gMax + 51;
+				A[j][i] = A[i][j];
+
+			}
+		}
+	}
+}
+
 //Здесь мы инициализируем матрицы
 void init()
 {
-	freopen("input.txt", "r", stdin);
-	freopen("output.txt", "w", stdout);
-	cin >> N;
+	//Очистка переменных
+	A.clear();
+	S.clear();
+	removed.clear();
+	base.clear();
+
 	A.resize(N + 1);
 	S.resize(N + 1);
 	removed.resize(N + 1, 0);
@@ -66,13 +93,15 @@ void init()
 	{
 		A[i].resize(N + 1);
 		S[i].resize(N + 1, 0);
-		for (int j = 1; j <= N; j++){
-			cin >> A[i][j];
+		for (int j = 1; j <= N; j++) 
+		{
 			if (A[i][j] < 0)
 				A[i][j] = pMax;
 		}
 	}
+	generation();
 }
+
 
 // Собственно говоря, само решение
 void solve()
@@ -144,15 +173,38 @@ void solve()
 	{
 		for (int j = 1; j <= N; j++)
 		{
-			printf("%d\t", A[i][j]);
+			A[i][j] = min(A[i][j], A[j][i]);
+			//printf("%d\t", A[i][j]);
 		}
-		printf("\n");
+		//printf("\n");
 	}
+}
+
+void solveFloid()
+{
+	for (int i = 1; i <= N; i++)
+		for (int j = 1; j <= N; j++)
+			for (int k = 1; k <= N; k++)
+				A[i][j] = min(A[i][j], A[i][k] + A[k][j]);
 }
 
 int main()
 {
-	init();
-	solve();
+	while (1) {
+		cin >> N;
+		init();
+		long timeStart = clock();
+		solve();
+		long timeNew = (clock() - timeStart), timeFloid;
+		cout <<  timeNew / (double)CLOCKS_PER_SEC << "\t\t - new Algorithm\n";
+		init();
+		timeStart = clock();
+		solveFloid();
+		timeFloid = (clock() - timeStart);
+		cout << timeFloid / (double)CLOCKS_PER_SEC << "\t\t - Floid Alogorithm\n";
+		cout << 100 - (timeNew * 100) / (double)timeFloid << "\t\t  - Acceleration\n";
+		cout << "=============================\n";
+	}
 	return 0;
+
 }
