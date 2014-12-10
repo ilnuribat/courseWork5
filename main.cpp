@@ -42,7 +42,8 @@ long findMinVert()
 	}
 	return 0;
 }
-int main()
+
+void init()
 {
 	freopen("input.txt", "r", stdin);
 	freopen("output.txt", "w", stdout);
@@ -50,7 +51,7 @@ int main()
 	A.resize(N);
 	S.resize(N);
 	removed.resize(N);
-	
+
 	for (int i = 0; i < N; i++)
 	{
 		A[i].resize(N);
@@ -61,6 +62,11 @@ int main()
 				A[i][j] = pMax;
 		}
 	}
+}
 
+int main()
+{
+	
+	init();
 	return 0;
 }
