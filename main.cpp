@@ -6,10 +6,16 @@
 
 using namespace std;
 
+//матрицы расстояний и послдователей
 vector<vector<long>> A, S;
+//массив стостояний - удалена ли вершина?
 vector<long> removed;
+//Массив соседей для конкретной вершины
 vector<long> neighbohoor;
-//A - матрица растояний, S - матрица последователей
+
+//Массив БАЗЫ. БАЗА - элементы, в котором точно установлено кратчайшие пути
+vector<long> base;
+
 long N;
 //Размерность
 const long pMax = 1000;
@@ -50,7 +56,7 @@ long findMinVert()
 void init()
 {
 	freopen("input.txt", "r", stdin);
-	//freopen("output.txt", "w", stdout);
+	freopen("output.txt", "w", stdout);
 	cin >> N;
 	A.resize(N + 1);
 	S.resize(N + 1);
@@ -98,14 +104,50 @@ void solve()
 				//не выполняется правило треугольника
 				if (A[*I][*J] > A[*I][Min] + A[Min][*J])
 					A[*I][*J] = A[*I][Min] + A[Min][*J];
-				//аналоги:
-				//A[i][j] = A[i][j] > A[i][Min] + A[Min][j] ? A[i][Min] + A[Min][j] : A[i][j];
-				//A[i][j] = min(A[i][j], A[i][Min] + A[Min][j]);
 			}
 		}
 	}
-
 	
+	for (int i = 1; i <= N; i++)
+		if (removed[i] == 0)
+			base.push_back(i);
+
+	//Процесс обратной вставки вершин
+	for (int p = N - 2; p > 0; p--)
+	{
+		//найти вершину, которую удалили в p-той итерации
+		long Insert = -1;
+		for (int i = 1; i <= N; i++)
+			if (removed[i] == p)
+				Insert = i;
+		if (Insert < 0)
+		{
+			cout << "error: Insert index not found";
+			return;
+		}
+		
+		//Восстанавливаем статус вершины в неудаленную
+		removed[Insert] = 0;
+
+		vector<long>::iterator I, J;
+		for (I = base.begin(); I != base.end(); I++)
+		{
+			for (J = base.begin(); J != base.end(); J++)
+			{
+				if (A[Insert][*I] > A[Insert][*J] + A[*J][*I])
+					A[Insert][*I] = A[Insert][*J] + A[*J][*I];
+			}
+		}
+		base.push_back(Insert);
+	}
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= N; j++)
+		{
+			printf("%d\t", A[i][j]);
+		}
+		printf("\n");
+	}
 }
 
 int main()
