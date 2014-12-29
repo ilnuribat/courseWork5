@@ -4,24 +4,31 @@
 #include <iostream>
 #include <algorithm>
 #include <time.h>
-
+#define WR printf
+#define FOR(i, k, n) for(long i = (k); i <= (n); i ++)
 using namespace std;
 
 //матрицы расстояний и послдователей
-vector<vector<long>> A, S;
+vector< vector <long> > A, S;
+
 //массив стостояний - удалена ли вершина?
 vector<long> removed;
+
 //Массив соседей для конкретной вершины
 vector<long> neighbohoor;
 
 //Массив БАЗЫ. БАЗА - элементы, в котором точно установлено кратчайшие пути
 vector<long> base;
 
-long N;
 //Размерность
+long N;
 
+//Максимальное отличние расстояний между городами
 const long gMax = 100;
-const long pMax = 100000;
+
+//Расстояние, если между вершинами графа нету ребер.
+const long pMax = 99;
+
 //Ищем вершину с минимальным количеством смежных вершин с остальными вершинами
 //которые ещё не были удалены
 long findMinVert()
@@ -45,7 +52,7 @@ long findMinVert()
 				if (removed[j] == 0 && A[i][j] < pMax)
 					count++;
 			}
-			if (count < Min){
+			if (count <= Min){
 				Min = count;
 				iMin = i;
 			}
@@ -76,10 +83,32 @@ void generation()
 	}
 }
 
+//Генерация графа, приближенного к реальному городу
+void generationCity()
+{
+	srand(time(NULL));
+	
+	for (int i = 1; i <= N; i++) A[i][i] = 0;
+
+	for (int i = 1; i <= N; i++)
+		for (int j = i + 1; j <= N; j++)
+			if (j - i > 2) {
+				A[i][j] = pMax;
+				A[j][i] = pMax;
+			}
+			else {
+				A[i][j] = rand() % gMax + 51;
+				A[j][i] = A[i][j];
+			}
+}
+
+
 //Здесь мы инициализируем матрицы
 void init()
 {
 	//Очистка переменных
+	//cin >> N;
+	N = 7;
 	A.clear();
 	S.clear();
 	removed.clear();
@@ -99,21 +128,34 @@ void init()
 				A[i][j] = pMax;
 		}
 	}
-	generation();
-}
 
+	int aa[7][7] = { 
+			{ 0, 3, 2, pMax, 10, pMax, pMax },
+			{ 3, 0, 5, 4, pMax, pMax, pMax },
+			{ 2, 5, 0, pMax, pMax, pMax, pMax },
+			{ pMax, 4, pMax, 0, 2, pMax, 6 },
+			{ 10, pMax, pMax, 2, 0, 4, 3 },
+			{ pMax, pMax, pMax, pMax, 4, 0, 2 },
+			{ pMax, pMax, pMax, 6, 3, 2, 0 } };
+	for (int i = 0; i < 7; i++)
+		for (int j = 0; j < 7; j++)
+			A[i + 1][j + 1] = aa[i][j];
+	//generationCity();
+}
 
 // Собственно говоря, само решение
 void solve()
 {
 	//Процесс удаления вершин
 	//p - порядковый номер удаления вершин
+	WR("Starting delete procedure:\n");
 	for (int p = 1; p < N - 1; p++)
-	{
+	{	
 		// Вершина, которую будем удалять
 		long Min = findMinVert();
 		removed[Min] = p;
-		
+		WR("\tdeleting vertex: %d\n", Min);
+
 		//находим все смежные вершины, которые ещё не удалены
 		neighbohoor.clear();
 		for (int i = 1; i < N; i++)
@@ -135,6 +177,14 @@ void solve()
 					A[*I][*J] = A[*I][Min] + A[Min][*J];
 			}
 		}
+
+		WR("after deleting the vertex:\n");
+		FOR(ii, 1, 7) {
+			FOR(jj, 1, 7)
+				WR("%d\t", A[ii][jj]);
+			WR("\n");
+		}
+		WR("================================\n");
 	}
 	
 	for (int i = 1; i <= N; i++)
@@ -142,6 +192,8 @@ void solve()
 			base.push_back(i);
 
 	//Процесс обратной вставки вершин
+	WR("\n\n================================\n\n");
+	WR("starting proccess of adding vertexes\n");
 	for (int p = N - 2; p > 0; p--)
 	{
 		//найти вершину, которую удалили в p-той итерации
@@ -149,11 +201,7 @@ void solve()
 		for (int i = 1; i <= N; i++)
 			if (removed[i] == p)
 				Insert = i;
-		if (Insert < 0)
-		{
-			cout << "error: Insert index not found";
-			return;
-		}
+		WR("Adding the vertex: %d\n", Insert);
 		
 		//Восстанавливаем статус вершины в неудаленную
 		removed[Insert] = 0;
@@ -168,30 +216,50 @@ void solve()
 			}
 		}
 		base.push_back(Insert);
+		WR("after adding the vertex:\n");
+		FOR(ii, 1, 7) {
+			FOR(jj, 1, 7) {
+				A[ii][jj] = min(A[ii][jj], A[jj][ii]);
+				WR("%d\t", A[ii][jj]);
+			}
+			WR("\n");
+		}
+		WR("================================\n");
 	}
+	printf("new algorithm:\n");
 	for (int i = 1; i <= N; i++)
 	{
 		for (int j = 1; j <= N; j++)
 		{
 			A[i][j] = min(A[i][j], A[j][i]);
-			//printf("%d\t", A[i][j]);
+			printf("%d\t", A[i][j]);
 		}
-		//printf("\n");
+		printf("\n");
 	}
 }
 
+//Всем известный алгоритм Флойда.
 void solveFloid()
 {
+	//printf("Floid's algorithm:\n");
 	for (int i = 1; i <= N; i++)
 		for (int j = 1; j <= N; j++)
 			for (int k = 1; k <= N; k++)
 				A[i][j] = min(A[i][j], A[i][k] + A[k][j]);
+	/*for (int i = 1; i <= N; i++) {
+		for (int j = 1; j <= N; j++)
+			printf("%d\t", A[i][j]);
+		printf("\n");
+	}*/
+
 }
 
 int main()
 {
-	while (1) {
-		cin >> N;
+	freopen("output.txt", "w", stdout);
+	//while (1) 
+	{
+		
 		init();
 		long timeStart = clock();
 		solve();
