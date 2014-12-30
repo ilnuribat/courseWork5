@@ -9,7 +9,7 @@
 using namespace std;
 
 //матрицы расстояний и послдователей
-vector< vector <long> > A, S;
+vector<vector<long>> A, S;
 
 //массив стостояний - удалена ли вершина?
 vector<long> removed;
@@ -140,6 +140,12 @@ void init()
 	for (int i = 0; i < 7; i++)
 		for (int j = 0; j < 7; j++)
 			A[i + 1][j + 1] = aa[i][j];
+	//Инициализация матрицы последователей
+	FOR(i, 1, N)
+		FOR(j, 1, N)
+			if (A[i][j] < pMax)
+				S[i][j] = j;
+			else S[i][j] = pMax;
 	//generationCity();
 }
 
@@ -173,8 +179,12 @@ void solve()
 			{
 				
 				//не выполняется правило треугольника
-				if (A[*I][*J] > A[*I][Min] + A[Min][*J])
+				if (A[*I][*J] > A[*I][Min] + A[Min][*J]) {
 					A[*I][*J] = A[*I][Min] + A[Min][*J];
+					//Через Min топать будет быстрее
+					S[*I][*J] = Min;
+					S[*I][*J] = Min;
+				}
 			}
 		}
 
@@ -209,10 +219,13 @@ void solve()
 		vector<long>::iterator I, J;
 		for (I = base.begin(); I != base.end(); I++)
 		{
-			for (J = base.begin(); J != base.end(); J++)
+			for (J = base.begin(); J != base.end(); J++)																																							
 			{
-				if (A[Insert][*I] > A[Insert][*J] + A[*J][*I])
+				if (A[Insert][*I] > A[Insert][*J] + A[*J][*I]) {
 					A[Insert][*I] = A[Insert][*J] + A[*J][*I];
+					S[Insert][*I] = *J;
+					S[*I][Insert] = *J;
+				}
 			}
 		}
 		base.push_back(Insert);
@@ -236,6 +249,13 @@ void solve()
 		}
 		printf("\n");
 	}
+	WR("\nMatrix of ways\n");
+	FOR(i, 1, N) {
+		FOR(j, 1, N)
+			WR("%d\t", S[i][j]);
+		WR("\n");
+	}
+
 }
 
 //Всем известный алгоритм Флойда.
@@ -259,7 +279,6 @@ int main()
 	freopen("output.txt", "w", stdout);
 	//while (1) 
 	{
-		
 		init();
 		long timeStart = clock();
 		solve();
