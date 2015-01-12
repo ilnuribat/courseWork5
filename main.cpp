@@ -195,6 +195,13 @@ void solve()
 			WR("\n");
 		}
 		WR("================================\n");
+		WR("ways\n");
+		FOR(ii, 1, 7) {
+			FOR(jj, 1, 7)
+				WR("\t%d", S[ii][jj]);
+			WR("\n");
+		}
+		WR("================================\n");
 	}
 	
 	for (int i = 1; i <= N; i++)
@@ -238,6 +245,13 @@ void solve()
 			WR("\n");
 		}
 		WR("================================\n");
+		WR("ways\n");
+		FOR(ii, 1, 7) {
+			FOR(jj, 1, 7)
+				WR("\t%d", S[ii][jj]);
+			WR("\n");
+		}
+		WR("================================\n");
 	}
 	printf("new algorithm:\n");
 	for (int i = 1; i <= N; i++)
@@ -249,13 +263,6 @@ void solve()
 		}
 		printf("\n");
 	}
-	WR("\nMatrix of ways\n");
-	FOR(i, 1, N) {
-		FOR(j, 1, N)
-			WR("%d\t", S[i][j]);
-		WR("\n");
-	}
-
 }
 
 //Всем известный алгоритм Флойда.
